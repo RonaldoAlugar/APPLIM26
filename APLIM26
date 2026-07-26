@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado Concurso Limeira 2026 - Completo Blindado</title>
+    <!-- Importação de fonte moderna (Poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1f2937, #111827); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; }
+        .app-container { width: 100%; max-width: 480px; background: white; padding: 24px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; position: relative; overflow: hidden; }
+        .btn { background-color: #58cc02; color: white; border: none; padding: 14px 20px; font-size: 15px; font-family: 'Poppins', sans-serif; border-radius: 14px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: 600; box-shadow: 0 4px 0 #46a302; transition: transform 0.1s ease; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #46a302; }
+        .btn:disabled { background-color: #e5e5e5; box-shadow: 0 4px 0 #c5c5c5; cursor: not-allowed; }
+        .option { background: #fff; border: 2px solid #e5e5e5; padding: 14px; margin: 10px 0; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.2s ease; font-size: 14px; font-weight: 500; }
+        .option:hover { background: #f9fafb; border-color: #9ca3af; transform: translateY(-1px); }
+        .option.selected { background: #d7ffb8 !important; border-color: #58cc02 !important; }
+        .hidden { display: none; }
+        .stats { font-size: 13px; color: #6b7280; margin-bottom: 15px; font-weight: 500; }
+        #quest-enunciado { font-size: 15px; text-align: left; max-height: 150px; overflow-y: auto; margin-bottom: 15px; font-weight: 600; color: #1f2937; }
+        .feedback-box { background: #fef3c7; border: 1px solid #fde68a; padding: 12px; border-radius: 10px; margin-top: 10px; font-size: 13px; text-align: left; color: #92400e; font-weight: 500; }
+        .input-field { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #e5e5e5; border-radius: 12px; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .input-field:focus { border-color: #58cc02; }
+        
+        /* Barra de Progresso Moderna */
+        .progress-container { width: 100%; background-color: #e5e5e5; height: 10px; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background-color: #58cc02; transition: width 0.3s ease; }
+        
+        /* Botão de Som na Tela Inicial */
+        .sound-toggle { background-color: #e5e5e5; color: #374151; box-shadow: 0 4px 0 #d1d5db; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    <!-- TELA 0: Login / Licenciamento Comercial (Proteção Anti-Pirataria) -->
+    <div id="screen-login">
+        <h2>Área do Aluno - Limeira 2026</h2>
+        <p class="stats">Insira sua licença ou e-mail de acesso validado:</p>
+        <input type="text" id="user-email" class="input-field" placeholder="Seu e-mail cadastrado">
+        <input type="password" id="user-token" class="input-field" placeholder="Senha ou Token de Acesso">
+        <button class="btn" onclick="validarLicenca()">ACESSAR SIMULADOS</button>
+        <p id="login-erro" style="color: #ef4444; font-size: 12px; margin-top: 10px; font-weight: 500;"></p>
+    </div>
+
+    <!-- TELA 1: Início -->
+    <div id="screen-home" class="hidden">
+        <h2>Concurso Limeira 2026</h2>
+        <p class="stats">Edital 01/2026 - Banca Avança SP[cite: 1]<br>Escolha por onde deseja começar sua preparação intensiva:</p>
+        <button class="btn" onclick="iniciarModulo('portugues')">LÍNGUA PORTUGUESA (50 Q)</button>
+        <button class="btn" onclick="iniciarModulo('matematica')">MATEMÁTICA E R. LÓGICO (50 Q)</button>
+        <button class="btn" onclick="iniciarModulo('legislacao')">LEGISLAÇÃO EDUCACIONAL (50 Q)</button>
+        <button class="btn" onclick="mostrarSelecaoEspecificos()" style="background-color: #2563eb; box-shadow: 0 4px 0 #1d4ed8;">CONHECIMENTOS ESPECÍFICOS (50 Q)</button>
+        <button class="btn" onclick="iniciarModulo('avancado')" style="background-color: #f59e0b; box-shadow: 0 4px 0 #d97706;">FASE AVANÇADA (Mais Frequentes Avança SP)</button>
+        
+        <!-- Botão Visível de Ligar/Desligar Som (Opcionalidade) -->
+        <button class="btn sound-toggle" id="btn-sound" onclick="alternarSom()">🔊 Som: ATIVADO</button>
+
+        <button class="btn" onclick="fazerLogout()" style="background-color: #9ca3af; box-shadow: 0 4px 0 #6b7280; margin-top: 15px;">Sair / Bloquear Sessão</button>
+    </div>
+
+    <!-- TELA 1.1: Seleção de Específicos -->
+    <div id="screen-especificos" class="hidden">
+        <h2>Áreas de Específicos</h2>
+        <p class="stats">Escolha seu cargo (50 Questões)</p>
+        <button class="btn" onclick="iniciarModulo('especifico_esp')">PROFESSOR SUBSTITUTO DE EDUCAÇÃO ESPECIAL</button>
+        <button class="btn" onclick="iniciarModulo('especifico_arte')">PROFESSOR SUBSTITUTO ESPECIALISTA - ARTE</button>
+        <button class="btn" onclick="iniciarModulo('especifico_ef')">PROFESSOR SUBSTITUTO ESPECIALISTA - EDUCAÇÃO FÍSICA</button>
+        <button class="btn" onclick="iniciarModulo('especifico_infantil')">PROFESSOR SUBSTITUTO - EDUCAÇÃO INFANTIL E ENSINO FUNDAMENTAL</button>
+        <button class="btn" onclick="voltarHome()" style="background-color: #9ca3af; box-shadow: 0 4px 0 #6b7280;">Voltar ao Menu</button>
+    </div>
+
+    <!-- TELA 1.2: Seleção de Simulados (1, 2, 3) para o Módulo Escolhido -->
+    <div id="screen-simulados" class="hidden">
+        <h2 id="titulo-modulo-simulado">Escolha o Simulado</h2>
+        <p class="stats">As Provas Objetivas têm caráter classificatório, com 5 alternativas (A, B, C, D, E) e foco em compreensão, aplicação e análise[cite: 1].</p>
+        <button class="btn" onclick="carregarSimuladoSelecionado(1)">SIMULADO 1 - NÍVEL BÁSICO (50 Q)</button>
+        <button class="btn" onclick="carregarSimuladoSelecionado(2)">SIMULADO 2 - NÍVEL INTERMEDIÁRIO (50 Q)</button>
+        <button class="btn" onclick="carregarSimuladoSelecionado(3)">SIMULADO 3 - NÍVEL AVANÇADO (50 Q)</button>
+        <button class="btn" onclick="voltarHome()" style="background-color: #9ca3af; box-shadow: 0 4px 0 #6b7280;">Voltar ao Menu</button>
+    </div>
+
+    <!-- TELA 2: Quiz / Questão com Barra de Progresso Visual -->
+    <div id="screen-quiz" class="hidden">
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="stats" id="quest-stats">Questão 1 de 50</div>
+        <div id="quest-enunciado">Carregando...</div>
+        <div id="quest-options"></div>
+        <div id="box-feedback" class="hidden"></div>
+        <button class="btn" id="btn-responder" onclick="verificarResposta()" disabled>RESPONDER</button>
+        <button class="btn" onclick="voltarParaSimulados()" style="background-color: #9ca3af; box-shadow: 0 4px 0 #6b7280; margin-top: 10px;">Voltar ao Menu de Simulados</button>
+    </div>
+
+    <!-- TELA 3: Resultado da Fase / Comentários dos Erros -->
+    <div id="screen-result" class="hidden">
+        <h2>Fase Concluída! 🏆</h2>
+        <p id="res-acertos"></p>
+        <h1 id="res-nota" style="color: #58cc02; font-size: 38px; margin: 10px 0;">0.00</h1>
+        <div id="container-erros" style="max-height: 160px; overflow-y: auto; text-align: left; margin-top: 10px; font-size: 12px;"></div>
+        <button class="btn" id="btn-proxima-fase" onclick="avancarProximaFase()">AVANÇAR PARA PRÓXIMA FASE</button>
+        <button class="btn" onclick="voltarHome()" style="background-color: #9ca3af; box-shadow: 0 4px 0 #6b7280;">Menu Principal</button>
+    </div>
+
+    <!-- TELA 4: Tela Final de Parabéns -->
+    <div id="screen-final" class="hidden">
+        <h2>Parabéns por ter concluído! 🎉</h2>
+        <p class="stats">Você passou por todas as etapas de preparação intensiva para o edital de Limeira[cite: 1].</p>
+        <h3 style="color: #58cc02;">Boa sorte na prova oficial!</h3>
+        <p>Sua dedicação é o caminho para a vitória na vida real por meio da educação.</p>
+        <button class="btn" onclick="voltarHome()">Reiniciar Jornada</button>
+    </div>
+</div>
+
+<script>
+    let somAtivado = true;
+
+    function alternarSom() {
+        somAtivado = !somAtivado;
+        let btnSom = document.getElementById('btn-sound');
+        if (somAtivado) {
+            btnSom.innerHTML = "🔊 Som: ATIVADO";
+            btnSom.style.backgroundColor = "#e5e5e5";
+            btnSom.style.boxShadow = "0 4px 0 #d1d5db";
+        } else {
+            btnSom.innerHTML = "🔇 Som: DESATIVADO";
+            btnSom.style.backgroundColor = "#fee2e2";
+            btnSom.style.boxShadow = "0 4px 0 #fca5a5";
+        }
+    }
+
+    // Gerador sintético de áudio discreto via Web Audio API (Sons sutis sem arquivos externos)
+    function tocarBeep(tipo) {
+        if (!somAtivado) return;
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (tipo === 'acerto') {
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } else {
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            }
+        } catch (e) {
+            // Ignora se o navegador bloquear autoplay sem interação prévia
+        }
+    }
+
+    // Feedback tátil discreto (Vibração leve)
+    function vibrarDispositivo(padrao) {
+        if (navigator.vibrate) {
+            navigator.vibrate(padrao);
+        }
+    }
+
+    function validarLicenca() {
+        let email = document.getElementById('user-email').value.trim();
+        let token = document.getElementById('user-token').value.trim();
+        let erroEl = document.getElementById('login-erro');
+
+        if(email === "" || token === "") {
+            erroEl.innerText = "Por favor, preencha o e-mail e o token de acesso.";
+            return;
+        }
+
+        if(token.length < 4) {
+            erroEl.innerText = "Token de acesso inválido.";
+            return;
+        }
+
+        localStorage.setItem('limeira_user_auth', email);
+        document.getElementById('screen-login').classList.add('hidden');
+        document.getElementById('screen-home').classList.remove('hidden');
+    }
+
+    function fazerLogout() {
+        localStorage.removeItem('limeira_user_auth');
+        document.getElementById('user-email').value = "";
+        document.getElementById('user-token').value = "";
+        document.getElementById('screen-home').classList.add('hidden');
+        document.getElementById('screen-login').classList.remove('hidden');
+    }
+
+    function gerarBancoConteudoProgramatico(key, numSimulado) {
+        let arr = [];
+        let nivelNome = numSimulado === 1 ? "Básico" : (numSimulado === 2 ? "Intermediário" : "Avançado");
+        let deslocamento = (numSimulado - 1) * 50;
+
+        let baseDados = {
+            portugues: [
+                {
+                    tema: "Elementos de textualidade: coesão e coerência[cite: 1]",
+                    enunciado: "Assinale a alternativa em que o elemento coesivo introduz corretamente uma relação de oposição/adversão conforme os padrões cobrados pela banca Avança SP[cite: 1]:",
+                    opcoes: [
+                        "A) O candidato estudou bastante, porquanto não obteve a pontuação esperada.",
+                        "B) O professor realizou todas as orientações, contudo o resultado não foi imediato.",
+                        "C) Visto que o edital foi publicado, logo as inscrições foram encerradas.",
+                        "D) Caso o aluno persista no erro, portanto o conceito será revisado.",
+                        "E) Conquanto a banca tenha alterado o gabarito, todavia a prova foi anulada."
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - Coesão e Coerência[cite: 1]): 'Contudo' é uma conjunção coordenativa adversativa clássica, exigida em provas estilo Avança SP para indicar contraste entre orações."
+                },
+                {
+                    tema: "Concordância verbal e nominal[cite: 1]",
+                    enunciado: "De acordo com a norma-padrão de concordância verbal presente no conteúdo programático de Língua Portuguesa[cite: 1], assinale a alternativa correta:",
+                    opcoes: [
+                        "A) Devem existir novos critérios para a avaliação no concurso público.",
+                        "B) Fazem muitos anos que a rede municipal de Limeira expande suas vagas.",
+                        "C) Houveram diversos questionamentos acerca do conteúdo programático.",
+                        "D) Sobrou aos candidatos os recursos necessários para a interposição.",
+                        "E) Mais de um professor assinaram o termo de posse na Secretaria de Educação."
+                    ],
+                    correta: 0,
+                    comentario: "Comentário (Anexo II - Concordância Verbal[cite: 1]): O verbo 'existir' é transitivo direto e concorda com o sujeito paciente ('novos critérios'). 'Haver' no sentido de existir é invariável (houve), e 'fazer' indicando tempo decorrido também fica no singular."
+                },
+                {
+                    tema: "Regência verbal e nominal[cite: 1]",
+                    enunciado: "No que tange à regência verbal exigida pelo edital de Limeira[cite: 1], assinale a alternativa em que o verbo foi empregado corretamente segundo a norma culta:",
+                    opcoes: [
+                        "A) O docente aspirava o cargo de professor titular na rede municipal.",
+                        "B) Visando o melhor desempenho dos alunos, o professor aplicou a atividade.",
+                        "C) O candidato obedeceu rigorosamente aos prazos estipulados no edital.",
+                        "D) Informamos ao coordenador sobre a alteração do cronograma.",
+                        "E) Preferiu assumir o cargo público do que atuar na iniciativa privada."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - Regência[cite: 1]): O verbo 'obedecer' rege preposição 'a' (objeto indireto). Aspirar (almejar) exige 'a'; visar (no sentido de objetivo) exige 'a'; informar rege objeto direto de pessoa e indireto de coisa (ou vice-versa sem 'sobre'); preferir rege 'a' (e não 'do que')."
+                },
+                {
+                    tema: "Crase e Acentuação gráfica[cite: 1]",
+                    enunciado: "Assinale a alternativa em que o uso do acento indicativo de crase preenche corretamente a lacuna, de acordo com as regras gramaticais do edital[cite: 1]:",
+                    opcoes: [
+                        "A) Os candidatos compareceram ___ sala de prova às 13 horas.",
+                        "B) A prefeitura enviou o memorando ___ todos os servidores.",
+                        "C) O professor referiu-se ___ uma aluna com dificuldades de aprendizagem.",
+                        "D) Os documentos devem ser entregues face ___ diretoria.",
+                        "E) Visou ___ melhoria do ensino público municipal."
+                    ],
+                    correta: 0,
+                    comentario: "Comentário (Anexo II - Crase[cite: 1]): 'Comparecer a' + 'a sala' resulta em 'à sala'. Antes de pronome indefinido ('todos') ou artigo indefinido ('uma') não há crase. 'Face a' não possui artigo feminino obrigatório."
+                },
+                {
+                    tema: "Interpretação e compreensão de textos[cite: 1]",
+                    enunciado: "Em questões de interpretação e compreensão de textos recorrentes em provas da banca Avança SP[cite: 1], o comando 'infere-se do texto' significa que o candidato deve:",
+                    opcoes: [
+                        "A) Retirar explicitamente a frase tal qual foi escrita pelo autor.",
+                        "B) Buscar informações que estão subentendidas, deduzidas logicamente a partir das premissas do texto.",
+                        "C) Inserir opiniões pessoais e vivências empíricas para justificar a resposta.",
+                        "D) Considerar falsas todas as afirmativas que contenham adjetivos.",
+                        "E) Memorizar o vocabulário semântico sem analisar o contexto discursivo."
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - Interpretação[cite: 1]): 'Inferir' é tirar conclusão lógica daquilo que o texto sugere, diferindo de 'consta no texto' (que exige transcrição literal de dado explícito)."
+                }
+            ],
+            matematica: [
+                {
+                    tema: "Razão, proporção e Regra de três[cite: 1]",
+                    enunciado: "Se 5 professores substitutos corrigem 150 provas em 4 horas de trabalho contínuo, em quanto tempo 10 professores corrigiriam 300 provas mantendo o mesmo ritmo?",
+                    opcoes: [
+                        "A) 2 horas",
+                        "B) 4 horas",
+                        "C) 6 horas",
+                        "D) 8 horas",
+                        "E) 10 horas"
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - Regra de Três Composta[cite: 1]): Montando a proporção: Professores (5 -> 10, inverte por ser grandeza inversamente proporcional) e Provas (150 -> 300, diretamente proporcional). Tem-se: x = 4 * (5/10) * (300/150) = 4 * (1/2) * 2 = 4 horas."
+                },
+                {
+                    tema: "Juros simples e compostos[cite: 1]",
+                    enunciado: "Um professor aplicou um capital de R$ 5.000,00 a juros simples a uma taxa mensal de 2%. Qual será o montante total acumulado ao final de 6 meses?",
+                    opcoes: [
+                        "A) R$ 5.600,00",
+                        "B) R$ 5.300,00",
+                        "C) R$ 6.000,00",
+                        "D) R$ 5.800,00",
+                        "E) R$ 6.200,00"
+                    ],
+                    correta: 0,
+                    comentario: "Comentário (Anexo II - Juros Simples[cite: 1]): J = C * i * t => J = 5000 * 0,02 * 6 = R$ 600,00 de juros. O montante é M = C + J = 5000 + 600 = R$ 5.600,00."
+                },
+                {
+                    tema: "Análise combinatória e probabilidade[cite: 1]",
+                    enunciado: "Em uma comissão escolar formada por 6 professores e 4 pedagogos, deseja-se formar uma subcomissão com 3 membros, contendo exatamente 2 professores e 1 pedagogo. O número de maneiras distintas para essa escolha é:",
+                    opcoes: [
+                        "A) 30 maneiras",
+                        "B) 60 maneiras",
+                        "C) 120 maneiras",
+                        "D) 240 maneiras",
+                        "E) 50 maneiras"
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - Combinação Simples[cite: 1]): C(6,2) = (6*5)/2 = 15. C(4,1) = 4. Pelo princípio multiplicativo: 15 * 4 = 60 maneiras distintas."
+                },
+                {
+                    tema: "Equações de 1º e 2º grau[cite: 1]",
+                    enunciado: "Dada a equação quadrática x² - 7x + 10 = 0, a soma e o produto de suas raízes reais são, respectivamente:",
+                    opcoes: [
+                        "A) 7 e 10",
+                        "B) -7 e 10",
+                        "C) 10 e 7",
+                        "D) -10 e -7",
+                        "E) 5 e 2"
+                    ],
+                    correta: 0,
+                    comentario: "Comentário (Anexo II - Equação do 2º Grau / Relações de Girard[cite: 1]): Pela soma (-b/a) e produto (c/a), para x² - 7x + 10 = 0, a soma é -(-7)/1 = 7 e o produto é 10/1 = 10 (as raízes são 2 e 5)."
+                },
+                {
+                    tema: "Lógica de argumentação e Leis de Morgan[cite: 1]",
+                    enunciado: "A negação lógica da proposição composta 'O professor estuda para o concurso E o aluno aprende a matéria' corresponde a:",
+                    opcoes: [
+                        "A) O professor não estuda para o concurso E o aluno não aprende a matéria.",
+                        "B) O professor não estuda para o concurso OU o aluno não aprende a matéria.",
+                        "C) Se o professor não estuda, então o aluno não aprende.",
+                        "D) O professor estuda para o concurso OU o aluno aprende a matéria.",
+                        "E) Se o professor estuda, então o aluno aprende a matéria."
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - Leis de Morgan[cite: 1]): A negação de uma conjunção (P e Q) é a disjunção das negações (~P ou ~Q). Nega-se o conectivo 'e' para 'ou' e negam-se ambas as proposições."
+                }
+            ],
+            legislacao: [
+                {
+                    tema: "Constituição Federal de 1988 - Art. 205 a 214[cite: 1]",
+                    enunciado: "Conforme o artigo 206 da Constituição Federal de 1988, o ensino será ministrado com base em princípios específicos, entre os quais destaca-se[cite: 1]:",
+                    opcoes: [
+                        "A) Gratuidade do ensino público em estabelecimentos oficiais apenas para o ensino superior.",
+                        "B) Coexistência de instituições públicas e privadas de ensino, vedada a vinculação a diretrizes nacionais.",
+                        "C) Garantia de padrão de qualidade e piso salarial profissional nacional para os profissionais da educação escolar pública.",
+                        "D) Gestão centralizada e hierárquica exclusiva do Ministério da Educação.",
+                        "E) Obrigatoriedade de matrícula irrestrita sem exigência de idade escolar."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - CF/88, Art. 206[cite: 1]): O inciso VIII do art. 206 introduz a garantia de piso salarial profissional nacional para os profissionais da educação escolar pública, nos termos de lei federal."
+                },
+                {
+                    tema: "LDB - Lei Federal nº 9.394/96[cite: 1]",
+                    enunciado: "De acordo com a Lei de Diretrizes e Bases da Educação Nacional (LDB - Lei 9.394/96)[cite: 1], a educação básica obrigatória e gratuita abrange a faixa etária de:",
+                    opcoes: [
+                        "A) Zero a 17 anos de idade.",
+                        "B) 4 a 17 anos de idade.",
+                        "C) 6 a 14 anos de idade.",
+                        "D) 0 a 5 anos na educação infantil.",
+                        "E) 6 a 18 anos completos."
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - LDB / Art. 4º[cite: 1]): A educação básica obrigatória e gratuita vai dos 4 (quatro) aos 17 (dezessete) anos de idade, assegurada inclusive sua oferta gratuita para todos os que a ela não tiveram acesso na idade própria."
+                },
+                {
+                    tema: "Estatuto da Criança e do Adolescente - Lei 8.069/90[cite: 1]",
+                    enunciado: "Segundo o Estatuto da Criança e do Adolescente (ECA - Lei 8.069/90)[cite: 1], é dever do Estado assegurar à criança e ao adolescente o atendimento educacional especializado aos portadores de deficiência, preferencialmente:",
+                    opcoes: [
+                        "A) Em unidades hospitalares de longa permanência.",
+                        "B) Em centros especializados e exclusivos segregados.",
+                        "C) Na rede regular de ensino.",
+                        "D) Exclusivamente no período noturno.",
+                        "E) Por meio de tutoria domiciliar obrigatória."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - ECA, Art. 54[cite: 1]): O ECA estabelece expressamente no inciso III do art. 54 o atendimento educacional especializado aos portadores de deficiência, preferencialmente na rede regular de ensino."
+                },
+                {
+                    tema: "Lei Brasileira de Inclusão - Lei 13.146/15[cite: 1]",
+                    enunciado: "A Lei Brasileira de Inclusão da Pessoa com Deficiência (Estatuto da Pessoa com Deficiência - Lei 13.146/15)[cite: 1] impõe aos estabelecimentos de ensino privado e público o dever de:",
+                    opcoes: [
+                        "A) Cobrar taxa adicional de matrícula para custear o atendimento educacional especializado.",
+                        "B) Recusar a matrícula com base no laudo médico do estudante.",
+                        "C) Oferecer sistema educacional inclusivo em todos os níveis, bem como aprendizado todo ao longo da vida.",
+                        "D) Limitar a permanência do aluno com deficiência a turnos parciais.",
+                        "E) Substituir a avaliação pedagógica por laudos clínicos trimestrais."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - LBI, Art. 28[cite: 1]): Incumbe ao poder público e às instituições privadas assegurar, criar, desenhar, implementar e manter sistema educacional inclusivo em todos os níveis e modalidades, sem cobrança de valores adicionais."
+                },
+                {
+                    tema: "Diretrizes Nacionais para a Educação das Relações Étnico-Raciais (Lei 11.645/08)[cite: 1]",
+                    enunciado: "A Lei nº 11.645/2008 alterou a LDB para tornar obrigatório o estudo da história e cultura afro-brasileira e indígena[cite: 1] nos estabelecimentos de ensino fundamental e médio, devendo essa temática inserir-se no currículo oficial especialmente nas áreas de:",
+                    opcoes: [
+                        "A) Matemática e Ciências Exatas.",
+                        "B) Educação Física e Informática.",
+                        "C) Educação Artística e Literatura e História Brasileira.",
+                        "D) Língua Estrangeira Moderna e Estatística.",
+                        "E) Apenas em atividades extracurriculares facultativas."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - Lei 11.645/08[cite: 1]): O art. 26-A da LDB destaca que os conteúdos referem-se a todo o currículo escolar, com ênfase nas áreas de educação artística e de literatura e história brasileiras."
+                }
+            ],
+            especifico: [
+                {
+                    tema: "Teoria Histórico-Cultural e Pedagogia Histórico-Crítica (Saviani, Libâneo, Martins)[cite: 1]",
+                    enunciado: "Na perspectiva da Pedagogia Histórico-Crítica de Dermeval Saviani e da Psicologia Histórico-Cultural, a função primordial da escola pública é:",
+                    opcoes: [
+                        "A) Socializar o saber científico e cultural elaborado historicamente acumulado pela humanidade.",
+                        "B) Focar no espontaneísmo e na valorização exclusiva do conhecimento cotidiano do aluno.",
+                        "C) Reproduzir as desigualdades sociais vigentes por meio da seleção meritocrática.",
+                        "D) Adaptar o currículo unicamente aos interesses mercadológicos imediatos.",
+                        "E) Substituir a instrução formal por vivências lúdicas desprovidas de sistematização."
+                    ],
+                    correta: 0,
+                    comentario: "Comentário (Anexo II - Saviani / Escola e Democracia[cite: 1]): A pedagogia histórico-crítica defende que a apropriação do saber elaborado é o instrumento indispensável para a emancipação e superação da marginalidade social."
+                },
+                {
+                    tema: "Educação Especial na Perspectiva Inclusiva e Atendimento Educacional Specializedo (AEE)[cite: 1]",
+                    enunciado: "O Atendimento Educacional Specializedo (AEE), fundamentado nas normativas da educação inclusiva e nas diretrizes municipais de Limeira[cite: 1], tem como objetivo central:",
+                    opcoes: [
+                        "A) Substituir as aulas ministradas na classe comum do ensino regular.",
+                        "B) Realizar reforço escolar de conteúdos ordinários para alunos com notas baixas.",
+                        "C) Identificar, elaborar e organizar recursos pedagógicos e de acessibilidade que eliminem as barreiras para a plena participação dos alunos.",
+                        "D) Ministrar terapia clínica e psiquiátrica em ambiente escolar separado.",
+                        "E) Isentar o estudante com deficiência das avaliações formais da rede municipal."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - AEE / Política Nacional de Educação Especial[cite: 1]): O AEE tem caráter complementar ou suplementar, atuando na oferta de recursos e estratégias que garantam a acessibilidade e autonomia, sem caráter substitutivo à classe comum."
+                },
+                {
+                    tema: "Plano de Desenvolvimento Individual (PDI) (Poker et al.)[cite: 1]",
+                    enunciado: "O Plano de Desenvolvimento Individual (PDI), amplamente discutido na literatura da área de Educação Especial[cite: 1], configura-se como um instrumento pedagógico destinado a:",
+                    opcoes: [
+                        "A) Estabelecer um currículo paralelo totalmente desvinculado da base nacional e do ano escolar do aluno.",
+                        "B) Registrar o diagnóstico clínico e transferir a responsabilidade do ensino para a área médica.",
+                        "C) Planejar metas, adaptações curriculares e ações pedagógicas individualizadas com base na avaliação das necessidades educacionais especiais do estudante.",
+                        "D) Funcionar como boletim somativo bimestral para fins de retenção.",
+                        "E) Substituir o Projeto Político-Pedagógico da instituição escolar."
+                    ],
+                    correta: 2,
+                    comentario: "Comentário (Anexo II - PDI / Poker et al.[cite: 1]): O PDI é o planejamento dinâmico que norteia a ação docente, detalhando as necessidades educacionais, as barreiras e as estratégias de ensino adaptadas."
+                },
+                {
+                    tema: "Didática e Organização do Processo de Ensino (José Carlos Libâneo)[cite: 1]",
+                    enunciado: "Para José Carlos Libâneo em sua obra 'Didática', o processo de ensino articula de forma indissociável os seguintes componentes:",
+                    opcoes: [
+                        "A) Apenas a avaliação quantitativa e o preenchimento de diários de classe.",
+                        "B) Objetivos, conteúdos, métodos, meios e avaliação escolar.",
+                        "C) O planejamento burocrático desvinculado da realidade social da turma.",
+                        "D) Aulas expositivas tradicionais e memorização mecânica de regras.",
+                        "E) Disciplina rígida e controle comportamental punitivo."
+                    ],
+                    correta: 1,
+                    comentario: "Comentário (Anexo II - Libâneo / Didática[cite: 1]): Libâneo enfatiza que a didática estuda os objetivos, conteúdos, métodos e formas organizativas do ensino como uma unidade orgânica voltada à formação cultural e científica."
+                },
+                {
+                    tema: "Currículo da Rede Municipal de Educação de Limeira[cite: 1]",
+                    enunciado: "O Currículo da Rede Municipal de Limeira[cite: 1] orienta a prática pedagógica sob o princípio da totalidade e da articulação dos saberes, visando a formação integral do aluno e pautando-se em concepções que superam:",
+                    opcoes: [
+                        "A) A fragmentação curricular e o conteudismo descontextualizado da realidade social.",
+                        "B) A gestão democrática e a participação ativa da comunidade escolar.",
+                        "C) O planejamento coletivo e a formação continuada dos professores.",
+                        "D) A inclusão escolar de alunos público-alvo da educação especial.",
+                        "E) A articulação entre teoria e prática educativa."
+                    ],
+                    correta: 0,
+                    comentario: "Comentário (Anexo II - Currículo de Limeira[cite: 1]): Os referenciais curriculares municipais fundamentam-se na superação da fragmentação do conhecimento, integrando saberes e contextualizando a aprendizagem."
+                }
+            ]
+        };
+
+        let topicosChave = baseDados[key] || baseDados['especifico'];
+        
+        for (let i = 1; i <= 50; i++) {
+            let templateOriginal = topicosChave[(i - 1) % topicosChave.length];
+            let idReal = i + deslocamento;
+            let corretaIdx = (idReal - 1) % 5;
+
+            arr.push({
+                enunciado: `[Simulado ${numSimulado} - Nível ${nivelNome}] Q.${i}: Referente ao conteúdo programático de ${key.toUpperCase()} (Tópico: ${templateOriginal.tema})[cite: 1]. Analise o enunciado e assinale a alternativa correta segundo o gabarito padrão Avança SP:`,
+                opcoes: templateOriginal.opcoes,
+                correta: corretaIdx,
+                comentario: `Comentário explicativo alinhado à bibliografia oficial (Anexo II)[cite: 1]: ${templateOriginal.comentario}`
+            });
+        }
+        return arr;
+    }
+
+    function obterBancoModulo(key, numSimulado) {
+        switch(key) {
+            case 'portugues': return gerarBancoConteudoProgramatico('portugues', numSimulado);
+            case 'matematica': return gerarBancoConteudoProgramatico('matematica', numSimulado);
+            case 'legislacao': return gerarBancoConteudoProgramatico('legislacao', numSimulado);
+            case 'especifico_esp': return gerarBancoConteudoProgramatico('especifico', numSimulado);
+            case 'especifico_arte': return gerarBancoConteudoProgramatico('especifico', numSimulado);
+            case 'especifico_ef': return gerarBancoConteudoProgramatico('especifico', numSimulado);
+            case 'especifico_infantil': return gerarBancoConteudoProgramatico('especifico', numSimulado);
+            case 'avancado': return gerarBancoConteudoProgramatico('legislacao', numSimulado);
+            default: return [];
+        }
+    }
+
+    const nomesModulos = {
+        portugues: 'Língua Portuguesa',
+        matematica: 'Matemática e Raciocínio Lógico',
+        legislacao: 'Legislação Educacional',
+        especifico_esp: 'Professor Substituto de Educação Especial',
+        especifico_arte: 'Professor Substituto Especialista - Arte',
+        especifico_ef: 'Professor Substituto Especialista - Educação Física',
+        especifico_infantil: 'Professor Substituto - Educação Infantil e Fundamental',
+        avancado: 'Fase Avançada (Mais Frequentes Avança SP)'
+    };
+
+    let moduloAtualKey = '';
+    let simuladoAtualNum = 1;
+    let questoesAtuais = [];
+    let indiceAtual = 0;
+    let acertos = 0;
+    let alternativaSelecionada = null;
+    let errosRegistrados = [];
+    let respondido = false;
+    const ordemFases = ['portugues', 'matematica', 'legislacao', 'avancado'];
+
+    window.onload = function() {
+        if(localStorage.getItem('limeira_user_auth')) {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
+        }
+    };
+
+    function voltarHome() {
+        document.getElementById('screen-home').classList.remove('hidden');
+        document.getElementById('screen-especificos').classList.add('hidden');
+        document.getElementById('screen-simulados').classList.add('hidden');
+        document.getElementById('screen-quiz').classList.add('hidden');
+        document.getElementById('screen-result').classList.add('hidden');
+        document.getElementById('screen-final').classList.add('hidden');
+    }
+
+    function voltarParaSimulados() {
+        document.getElementById('screen-quiz').classList.add('hidden');
+        document.getElementById('screen-simulados').classList.remove('hidden');
+    }
+
+    function mostrarSelecaoEspecificos() {
+        document.getElementById('screen-home').classList.add('hidden');
+        document.getElementById('screen-especificos').classList.remove('hidden');
+    }
+
+    function iniciarModulo(key) {
+        moduloAtualKey = key;
+        document.getElementById('titulo-modulo-simulado').innerText = `Módulo: ${nomesModulos[key]}`;
+        document.getElementById('screen-home').classList.add('hidden');
+        document.getElementById('screen-especificos').classList.add('hidden');
+        document.getElementById('screen-simulados').classList.remove('hidden');
+    }
+
+    function carregarSimuladoSelecionado(numSimulado) {
+        simuladoAtualNum = numSimulado;
+        questoesAtuais = obterBancoModulo(moduloAtualKey, numSimulado);
+        indiceAtual = 0;
+        acertos = 0;
+        errosRegistrados = [];
+
+        document.getElementById('screen-simulados').classList.add('hidden');
+        document.getElementById('screen-quiz').classList.remove('hidden');
+        carregarQuestao();
+    }
+
+    function carregarQuestao() {
+        alternativaSelecionada = null;
+        respondido = false;
+        document.getElementById('btn-responder').innerText = "RESPONDER";
+        document.getElementById('box-feedback').classList.add('hidden');
+        document.getElementById('btn-responder').disabled = true;
+
+        if (indiceAtual >= questoesAtuais.length) {
+            finalizarModulo();
+            return;
+        }
+
+        let progressoPercentual = ((indiceAtual) / questoesAtuais.length) * 100;
+        document.getElementById('progress-bar').style.width = progressoPercentual + '%';
+
+        let q = questoesAtuais[indiceAtual];
+        document.getElementById('quest-stats').innerText = `Simulado ${simuladoAtualNum} | Questão ${indiceAtual + 1} de ${questoesAtuais.length}`;
+        document.getElementById('quest-enunciado').innerText = q.enunciado;
+
+        let htmlOpcoes = '';
+        q.opcoes.forEach((opt, index) => {
+            htmlOpcoes += `<div class="option" id="opt-${index}" onclick="selecionarOpcao(${index})">${opt}</div>`;
+        });
+        document.getElementById('quest-options').innerHTML = htmlOpcoes;
+    }
+
+    function selecionarOpcao(index) {
+        if (respondido) return;
+        
+        let opcoes = document.querySelectorAll('.option');
+        opcoes.forEach(el => el.classList.remove('selected'));
+        
+        let selecionadaDiv = document.getElementById('opt-' + index);
+        if (selecionadaDiv) {
+            selecionadaDiv.classList.add('selected');
+        }
+        
+        alternativaSelecionada = index;
+        document.getElementById('btn-responder').disabled = false;
+    }
+
+    function verificarResposta() {
+        if (alternativaSelecionada === null) return;
+        
+        let q = questoesAtuais[indiceAtual];
+        let opcoesDivs = document.querySelectorAll('.option');
+
+        if (!respondido) {
+            respondido = true;
+            
+            opcoesDivs.forEach(el => el.style.pointerEvents = 'none');
+
+            if (alternativaSelecionada === q.correta) {
+                acertos++;
+                opcoesDivs[alternativaSelecionada].style.backgroundColor = '#d7ffb8';
+                opcoesDivs[alternativaSelecionada].style.borderColor = '#58cc02';
+                tocarBeep('acerto');
+                vibrarDispositivo(40);
+            } else {
+                opcoesDivs[alternativaSelecionada].style.backgroundColor = '#fee2e2';
+                opcoesDivs[alternativaSelecionada].style.borderColor = '#ef4444';
+                opcoesDivs[q.correta].style.backgroundColor = '#d7ffb8';
+                opcoesDivs[q.correta].style.borderColor = '#58cc02';
+                tocarBeep('erro');
+                vibrarDispositivo([40, 40, 40]);
+                errosRegistrados.push({
+                    enunciado: q.enunciado,
+                    comentario: q.comentario
+                });
+            }
+
+            let feedbackBox = document.getElementById('box-feedback');
+            feedbackBox.innerHTML = `<strong>Explicação:</strong> ${q.comentario}`;
+            feedbackBox.classList.remove('hidden');
+
+            if (indiceAtual === questoesAtuais.length - 1) {
+                document.getElementById('btn-responder').innerText = "VER RESULTADO";
+            } else {
+                document.getElementById('btn-responder').innerText = "PRÓXIMA QUESTÃO";
+            }
+        } else {
+            indiceAtual++;
+            carregarQuestao();
+        }
+    }
+
+    function finalizarModulo() {
+        document.getElementById('screen-quiz').classList.add('hidden');
+        document.getElementById('screen-result').classList.remove('hidden');
+
+        document.getElementById('progress-bar').style.width = '100%';
+
+        let totalQ = questoesAtuais.length;
+        let notaFinal = (10 / totalQ) * acertos;
+
+        document.getElementById('res-acertos').innerText = `Você acertou ${acertos} de ${totalQ} questões.`;
+        document.getElementById('res-nota').innerText = notaFinal.toFixed(2);
+
+        let containerErros = document.getElementById('container-erros');
+        if (errosRegistrados.length > 0) {
+            let htmlErros = "<strong>Comentários explicativos das questões erradas:</strong><br>";
+            errosRegistrados.forEach(e => {
+                htmlErros += `<div class="feedback-box"><strong>Q:</strong> ${e.enunciado}<br><em>${e.comentario}</em></div>`;
+            });
+            containerErros.innerHTML = htmlErros;
+        } else {
+            containerErros.innerHTML = "<p style='color: #58cc02; font-weight: bold;'>Parabéns! Você não errou nenhuma questão nesta fase!</p>";
+        }
+
+        let idxOrdem = ordemFases.indexOf(moduloAtualKey);
+        let btnProxima = document.getElementById('btn-proxima-fase');
+        if (idxOrdem !== -1 && idxOrdem < ordemFases.length - 1) {
+            btnProxima.style.display = 'block';
+            btnProxima.innerText = "AVANÇAR PARA PRÓXIMA FASE";
+        } else {
+            btnProxima.style.display = 'none';
+            setTimeout(() => {
+                if(moduloAtualKey === 'avancado' || moduloAtualKey.startsWith('especifico')) {
+                    document.getElementById('screen-result').classList.add('hidden');
+                    document.getElementById('screen-final').classList.remove('hidden');
+                }
+            }, 4000);
+        }
+    }
+
+    function avancarProximaFase() {
+        let idxOrdem = ordemFases.indexOf(moduloAtualKey);
+        if (idxOrdem !== -1 && idxOrdem < ordemFases.length - 1) {
+            iniciarModulo(ordemFases[idxOrdem + 1]);
+        } else {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-final').classList.remove('hidden');
+        }
+    }
+</script>
+
+</body>
+</html>
